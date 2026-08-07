@@ -1,0 +1,27 @@
+[package]
+org = "hacker-house-medellin"
+name = "hhm-mcp-server"
+version = "0.1.0"
+description = "Read-only MCP server for the hacker-house-medellin organization"
+license = "MIT"
+language = "rust"
+
+[package.repository]
+vcs = "git"
+url = "https://github.com/hacker-house-medellin/hhm-mcp-server.rs"
+
+[install]
+dir = ".vendor/.zed"
+
+[publish]
+include_readme = true
+tag_format = "v{version}"
+exclude = ["target/**", ".vendor/**", ".zed/**", ".env", ".env.*", "*.log"]
+
+[dependencies]
+"hacker-house-medellin/hhm-clients" = "^0.1.0"
+"hacker-house-medellin/hhm-interfaces" = "^0.1.0"
+"hacker-house-medellin/hhm-libs" = "^0.1.0"
+"hacker-house-medellin/hhm-cli" = "^0.1.0"
+"hacker-house-medellin/hhm-sync" = "^0.1.0"
+"shared-auth/shared-auth-clients" = "^0.1.0"
