@@ -142,12 +142,9 @@ fn official_rmcp_process_preserves_protocol_and_tool_contract() {
 
     for id in ["3", "8", "9"] {
         let call = responses.get(id).expect("tools/call response");
-        let result = audit_text_tool_result_response(
-            call,
-            &json!(id.parse::<u64>().unwrap()),
-            64 * 1024,
-        )
-        .expect("bounded text tool result");
+        let result =
+            audit_text_tool_result_response(call, &json!(id.parse::<u64>().unwrap()), 64 * 1024)
+                .expect("bounded text tool result");
         assert_eq!(result.content_items, 1);
         assert!(!result.is_error);
         let call_json: Value = serde_json::from_slice(call).expect("parse tools/call response");
@@ -158,8 +155,10 @@ fn official_rmcp_process_preserves_protocol_and_tool_contract() {
         let response: Value = serde_json::from_slice(responses.get(id).unwrap()).unwrap();
         assert_eq!(response["error"]["code"], -32602);
     }
-    assert!(!String::from_utf8_lossy(responses.get("10").unwrap())
-        .contains("hacker-house-medellin/unknown"));
+    assert!(
+        !String::from_utf8_lossy(responses.get("10").unwrap())
+            .contains("hacker-house-medellin/unknown")
+    );
 
     let ping: Value = serde_json::from_slice(responses.get("6").unwrap()).unwrap();
     assert_eq!(ping["result"], json!({}));
@@ -167,8 +166,10 @@ fn official_rmcp_process_preserves_protocol_and_tool_contract() {
     let unknown: Value = serde_json::from_slice(responses.get("7").unwrap()).unwrap();
     assert_eq!(unknown["error"]["code"], -32601);
     assert_eq!(unknown["error"]["message"], "method not found");
-    assert!(!String::from_utf8_lossy(responses.get("7").unwrap())
-        .contains("hacker-house-medellin/unknown"));
+    assert!(
+        !String::from_utf8_lossy(responses.get("7").unwrap())
+            .contains("hacker-house-medellin/unknown")
+    );
 }
 
 #[test]
@@ -189,7 +190,10 @@ fn exact_protocol_wrapper_rejects_preview_and_legacy_versions() {
         assert_eq!(response["jsonrpc"], "2.0");
         assert_eq!(response["id"], id);
         assert_eq!(response["error"]["code"], -32600);
-        assert_eq!(response["error"]["message"], "unsupported MCP protocol version");
+        assert_eq!(
+            response["error"]["message"],
+            "unsupported MCP protocol version"
+        );
         assert!(response.get("result").is_none());
         assert!(!String::from_utf8_lossy(raw).contains(requested_version));
         assert!(!String::from_utf8_lossy(&stderr).contains(requested_version));
