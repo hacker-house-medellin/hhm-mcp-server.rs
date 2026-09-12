@@ -5,3 +5,9 @@
 /.sops.yaml
 *.agekey
 *.age-key
+# DEN-3956: ignore agent scratch worktrees and temp dirs (fleet policy)
+tmp/
+temp/
+.tmp/
+tmp/worktrees/
+**/tmp/worktrees/
