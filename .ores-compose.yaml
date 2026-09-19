@@ -1,10 +1,10 @@
 schema_version: ores.compose.v1
-project: hhm-mcp-server.rs
+project: hhm-mcp-server
 allow_lazy_start: false
 
 services:
-  hhm-mcp-server.rs:
-    name: hhm-mcp-server.rs
+  hhm-mcp-server:
+    name: hhm-mcp-server
     runtime: host
     build:
       - ["cargo", "build", "--bins"]
