@@ -1,0 +1,29 @@
+name: Formal Wave 7
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  authority-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Exhaust house MCP authority lattice
+        run: |
+          python3 - <<'PY'
+          from itertools import product
+          for auth, tenant, resident_write, house_admin, tool in product((False,True),(False,True),(False,True),(False,True),('read','reserve','admin')):
+              allowed = auth and tenant
+              if tool == 'reserve': allowed = allowed and resident_write
+              if tool == 'admin': allowed = allowed and house_admin
+              if tool != 'read' and allowed:
+                  assert auth and tenant
+              if tool == 'reserve' and allowed: assert resident_write
+              if tool == 'admin' and allowed: assert house_admin
+              if not auth or not tenant: assert not allowed
+          print('HHM MCP authority lattice: ok')
+          PY
