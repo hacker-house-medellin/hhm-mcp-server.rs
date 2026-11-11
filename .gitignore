@@ -16,3 +16,15 @@ target/
 tmp/temp/
 tmp/worktrees/
 # <<< ores fleet hygiene <<<
+
+# DEN-3956 + repository-local worktrees (fleet policy), union of
+# chore/DEN-3956-scratch-ignores-20260912 and
+# chore/repository-local-worktrees-20260905. Deliberately OUTSIDE the managed
+# block above, whose contents are regenerated. The bare `tmp` / `temp` forms are
+# the ones AGENTS.md prescribes ("Keep tmp, temp, tmp/worktrees, and
+# temp/worktrees ignored in the repository-root .gitignore") and, having no
+# slash, they match at any depth, so they also cover tmp/worktrees,
+# temp/worktrees and **/tmp/worktrees/. `.tmp/` comes from the DEN-3956 lane.
+tmp
+temp
+.tmp/
