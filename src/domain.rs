@@ -234,7 +234,7 @@ mod tests {
 
         assert!(!configured_value(None));
         assert!(!configured_value(Some(OsStr::new(""))));
-        assert!(!configured_value(Some(OsStr::new(" \\t\\n"))));
+        assert!(!configured_value(Some(OsStr::new(" \t\n"))));
         assert!(configured_value(Some(OsStr::new("opaque-secret"))));
         assert!(configured_value(Some(OsStr::new("https://example.test"))));
     }
