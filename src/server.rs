@@ -7,7 +7,7 @@ use ores_mcp_server_core_libs::state_machine::LifecycleController;
 use rmcp::{
     ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::{Implementation, ProtocolVersion, ServerCapabilities, ServerInfo},
+    model::{Implementation, ProtocolVersion, ServerCapabilities, ServerConfig},
     tool, tool_handler, tool_router,
 };
 use serde_json::Value;
@@ -147,8 +147,8 @@ impl ServerHandler for HackerHouseMedellinMCPServer {
         ])
     }
 
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+    fn get_info(&self) -> ServerConfig {
+        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_server_info(Implementation::new(SERVER_NAME, env!("CARGO_PKG_VERSION")).with_title("Hacker House Medellin MCP Server"))
             .with_instructions("Read-only MCP diagnostics for applications, residents, stays, rooms, events, and projects. The server is read-only and never logs MCP arguments or results.")
     }
