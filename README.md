@@ -44,3 +44,7 @@
     cargo build --locked --release
     cargo audit --deny warnings
     ```
+
+## Static authority discovery
+
+The read-only `hhm_authority_map` MCP tool reports where reviewed contracts, domain rules, persistence operations, and deployment configuration belong. It deliberately marks runtime verification as false: it does not inspect live providers, read credentials, or authorize operations.
