@@ -244,7 +244,9 @@ mod tests {
     fn readiness_rejects_non_utf8_configuration() {
         use std::os::unix::ffi::OsStrExt;
 
-        assert!(!configured_value(Some(std::ffi::OsStr::from_bytes(&[0xff, 0xfe]))));
+        assert!(!configured_value(Some(std::ffi::OsStr::from_bytes(&[
+            0xff, 0xfe
+        ]))));
     }
 
     #[test]
