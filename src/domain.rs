@@ -139,7 +139,10 @@ pub fn plan(input: PlanInput) -> Result<Value, String> {
 pub fn runtime_readiness() -> Value {
     let variables = READINESS_VARIABLES
         .into_iter()
-        .map(|name| json!({"name": name, "configured": std::env::var_os(name).is_some()}))
+        .map(|name| {
+            let value = std::env::var_os(name);
+            json!({"name": name, "configured": configured_value(value.as_deref())})
+        })
         .collect::<Vec<_>>();
     json!({
         "configuration": variables,
@@ -147,6 +150,14 @@ pub fn runtime_readiness() -> Value {
         "networkChecked": false,
         "authenticated": false
     })
+}
+
+// Configuration presence is only meaningful for non-blank UTF-8 values.
+// Never place the value (including invalid Unicode) in tool output or telemetry.
+fn configured_value(value: Option<&std::ffi::OsStr>) -> bool {
+    value
+        .and_then(std::ffi::OsStr::to_str)
+        .is_some_and(|value| !value.trim().is_empty())
 }
 
 #[must_use]
@@ -215,6 +226,25 @@ mod tests {
         assert_eq!(map["readOnly"], true);
         assert_eq!(map["runtimeVerified"], false);
         assert_eq!(map["mutationExposed"], false);
+    }
+
+    #[test]
+    fn readiness_rejects_blank_or_missing_configuration_without_exposing_values() {
+        use std::ffi::OsStr;
+
+        assert!(!configured_value(None));
+        assert!(!configured_value(Some(OsStr::new(""))));
+        assert!(!configured_value(Some(OsStr::new(" \\t\\n"))));
+        assert!(configured_value(Some(OsStr::new("opaque-secret"))));
+        assert!(configured_value(Some(OsStr::new("https://example.test"))));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn readiness_rejects_non_utf8_configuration() {
+        use std::os::unix::ffi::OsStrExt;
+
+        assert!(!configured_value(Some(std::ffi::OsStr::from_bytes(&[0xff, 0xfe]))));
     }
 
     #[test]
