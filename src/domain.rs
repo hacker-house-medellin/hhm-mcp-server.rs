@@ -75,6 +75,20 @@ pub struct PlanInput {
     pub redundancy: u8,
 }
 
+/// Static ownership only; this is not evidence of provider readiness.
+#[must_use]
+pub fn authority_map() -> Value {
+    json!({
+        "contracts": "hacker-house-medellin/hhm-interfaces",
+        "domain": "hacker-house-medellin/hhm-lib-core",
+        "persistence": "hacker-house-medellin/hhm-orm-core",
+        "deployment": "hacker-house-medellin/hhm-infra",
+        "readOnly": true,
+        "runtimeVerified": false,
+        "mutationExposed": false
+    })
+}
+
 #[must_use]
 pub fn fleet_map() -> Value {
     let repositories = REPOSITORIES
@@ -191,6 +205,16 @@ mod tests {
         }))
         .expect("serde intentionally delegates numeric bounds");
         assert!(plan(too_large).is_err());
+    }
+
+    #[test]
+    fn static_authority_map_is_read_only_and_not_a_live_readiness_claim() {
+        let map = authority_map();
+        assert_eq!(map["contracts"], "hacker-house-medellin/hhm-interfaces");
+        assert_eq!(map["persistence"], "hacker-house-medellin/hhm-orm-core");
+        assert_eq!(map["readOnly"], true);
+        assert_eq!(map["runtimeVerified"], false);
+        assert_eq!(map["mutationExposed"], false);
     }
 
     #[test]
