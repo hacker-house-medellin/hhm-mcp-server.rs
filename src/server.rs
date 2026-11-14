@@ -41,6 +41,17 @@ impl HackerHouseMedellinMCPServer {
 #[tool_router]
 impl HackerHouseMedellinMCPServer {
     #[tool(
+        description = "Return the static HHM contract, domain, persistence, and deployment ownership map. No live authority is inferred."
+    )]
+    #[tracing::instrument(name = "mcp.tool", skip_all, fields(mcp.tool.name = "hhm_authority_map", mcp.tool.class = "inventory"))]
+    fn hhm_authority_map(&self) -> String {
+        let timer = self.metrics.start(ToolClass::Inventory);
+        let output = render(&domain::authority_map());
+        timer.finish(ToolOutcome::Ok);
+        output
+    }
+
+    #[tool(
         description = "Return the product-owned repository topology and component roles. Pure, local, and read-only."
     )]
     #[tracing::instrument(name = "mcp.tool", skip_all, fields(mcp.tool.name = "hhm_fleet_map", mcp.tool.class = "inventory"))]
@@ -166,6 +177,7 @@ mod tests {
         assert_eq!(
             names,
             [
+                "hhm_authority_map",
                 "hhm_fleet_map",
                 "hhm_lifecycle_state",
                 "hhm_plan",
