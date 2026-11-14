@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  SHARED_MCP_REV: c6101656c8227251d1dbd61df54f03a186b42ade
+  SHARED_MCP_REV: 0450716331a29747568609e3535f5e7f46f70bb5
 
 jobs:
   runtime:
@@ -46,7 +46,7 @@ jobs:
           test "$(grep -Fc "rev = \"${SHARED_MCP_REV}\"" Cargo.toml)" -eq 1
           grep -Fq 'ores-mcp-server-core-libs' Cargo.toml
           grep -Fq "#${SHARED_MCP_REV}\"" Cargo.lock
-          grep -Fq 'version = "=3.1.4"' Cargo.toml
+          grep -Fq 'version = "=3.9.0"' Cargo.toml
           cargo metadata --locked --format-version 1 >/dev/null
           git diff --exit-code -- Cargo.lock
 
