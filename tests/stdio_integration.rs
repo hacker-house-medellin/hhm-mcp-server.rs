@@ -66,7 +66,7 @@ fn architecture_reserves_stdout_and_uses_explicit_low_cardinality_telemetry() {
     assert!(server.contains("skip_all"));
     assert!(!server.contains("mcp.tool.arguments"));
     assert!(!server.contains("mcp.tool.result"));
-    assert!(manifest.contains("c6101656c8227251d1dbd61df54f03a186b42ade"));
+    assert!(manifest.contains("0450716331a29747568609e3535f5e7f46f70bb5"));
 }
 
 #[test]

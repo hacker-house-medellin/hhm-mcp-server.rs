@@ -7,7 +7,7 @@ use ores_mcp_server_core_libs::state_machine::LifecycleController;
 use rmcp::{
     ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::{Implementation, ProtocolVersion, ServerCapabilities, ServerInfo},
+    model::{Implementation, ProtocolVersion, ServerCapabilities, ServerConfig},
     tool, tool_handler, tool_router,
 };
 use serde_json::Value;
@@ -40,6 +40,17 @@ impl HackerHouseMedellinMCPServer {
 
 #[tool_router]
 impl HackerHouseMedellinMCPServer {
+    #[tool(
+        description = "Return the static HHM contract, domain, persistence, and deployment ownership map. No live authority is inferred."
+    )]
+    #[tracing::instrument(name = "mcp.tool", skip_all, fields(mcp.tool.name = "hhm_authority_map", mcp.tool.class = "inventory"))]
+    fn hhm_authority_map(&self) -> String {
+        let timer = self.metrics.start(ToolClass::Inventory);
+        let output = render(&domain::authority_map());
+        timer.finish(ToolOutcome::Ok);
+        output
+    }
+
     #[tool(
         description = "Return the product-owned repository topology and component roles. Pure, local, and read-only."
     )]
@@ -136,8 +147,8 @@ impl ServerHandler for HackerHouseMedellinMCPServer {
         ])
     }
 
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+    fn get_info(&self) -> ServerConfig {
+        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_server_info(Implementation::new(SERVER_NAME, env!("CARGO_PKG_VERSION")).with_title("Hacker House Medellin MCP Server"))
             .with_instructions("Read-only MCP diagnostics for applications, residents, stays, rooms, events, and projects. The server is read-only and never logs MCP arguments or results.")
     }
@@ -166,6 +177,7 @@ mod tests {
         assert_eq!(
             names,
             [
+                "hhm_authority_map",
                 "hhm_fleet_map",
                 "hhm_lifecycle_state",
                 "hhm_plan",

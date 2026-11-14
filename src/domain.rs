@@ -75,6 +75,20 @@ pub struct PlanInput {
     pub redundancy: u8,
 }
 
+/// Static ownership only; this is not evidence of provider readiness.
+#[must_use]
+pub fn authority_map() -> Value {
+    json!({
+        "contracts": "hacker-house-medellin/hhm-interfaces",
+        "domain": "hacker-house-medellin/hhm-lib-core",
+        "persistence": "hacker-house-medellin/hhm-orm-core",
+        "deployment": "hacker-house-medellin/hhm-infra",
+        "readOnly": true,
+        "runtimeVerified": false,
+        "mutationExposed": false
+    })
+}
+
 #[must_use]
 pub fn fleet_map() -> Value {
     let repositories = REPOSITORIES
@@ -125,7 +139,10 @@ pub fn plan(input: PlanInput) -> Result<Value, String> {
 pub fn runtime_readiness() -> Value {
     let variables = READINESS_VARIABLES
         .into_iter()
-        .map(|name| json!({"name": name, "configured": std::env::var_os(name).is_some()}))
+        .map(|name| {
+            let value = std::env::var_os(name);
+            json!({"name": name, "configured": configured_value(value.as_deref())})
+        })
         .collect::<Vec<_>>();
     json!({
         "configuration": variables,
@@ -133,6 +150,14 @@ pub fn runtime_readiness() -> Value {
         "networkChecked": false,
         "authenticated": false
     })
+}
+
+// Configuration presence is only meaningful for non-blank UTF-8 values.
+// Never place the value (including invalid Unicode) in tool output or telemetry.
+fn configured_value(value: Option<&std::ffi::OsStr>) -> bool {
+    value
+        .and_then(std::ffi::OsStr::to_str)
+        .is_some_and(|value| !value.trim().is_empty())
 }
 
 #[must_use]
@@ -191,6 +216,37 @@ mod tests {
         }))
         .expect("serde intentionally delegates numeric bounds");
         assert!(plan(too_large).is_err());
+    }
+
+    #[test]
+    fn static_authority_map_is_read_only_and_not_a_live_readiness_claim() {
+        let map = authority_map();
+        assert_eq!(map["contracts"], "hacker-house-medellin/hhm-interfaces");
+        assert_eq!(map["persistence"], "hacker-house-medellin/hhm-orm-core");
+        assert_eq!(map["readOnly"], true);
+        assert_eq!(map["runtimeVerified"], false);
+        assert_eq!(map["mutationExposed"], false);
+    }
+
+    #[test]
+    fn readiness_rejects_blank_or_missing_configuration_without_exposing_values() {
+        use std::ffi::OsStr;
+
+        assert!(!configured_value(None));
+        assert!(!configured_value(Some(OsStr::new(""))));
+        assert!(!configured_value(Some(OsStr::new(" \t\n"))));
+        assert!(configured_value(Some(OsStr::new("opaque-secret"))));
+        assert!(configured_value(Some(OsStr::new("https://example.test"))));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn readiness_rejects_non_utf8_configuration() {
+        use std::os::unix::ffi::OsStrExt;
+
+        assert!(!configured_value(Some(std::ffi::OsStr::from_bytes(&[
+            0xff, 0xfe
+        ]))));
     }
 
     #[test]
